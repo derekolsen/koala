@@ -1,6 +1,0 @@
-apt:
-  xvfb
-  i3
-  ffmpeg
-snap:
-  chromium
