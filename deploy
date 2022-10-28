@@ -1,2 +1,2 @@
 # script to quickly deploy to a local server and run
-scp koala root@koala-server:~/. > /dev/null && ssh -t root@koala-server '~/run.sh'
+scp koala root@koala-server:~/. && ssh -t root@koala-server '~/run.sh'
