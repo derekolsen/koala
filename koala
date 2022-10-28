@@ -31,8 +31,6 @@ create_stream() {
     Xvfb ${DISPLAY} -screen 0 ${width}x${height}x${colordepth} &
     pids="$! $pids"
 
-    mkdir -p ${HOME}/.chromium
-
     ${chromium} \
         --user-data-dir=$(mktemp -d) \
         --kiosk \
