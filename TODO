@@ -2,4 +2,6 @@ Check for missing required params
 
 Check for same destination AND port (maybe combine destination and port)
 
-Create systemd unit
+Create .deb for easy install?
+
+Move configuration to /etc/?

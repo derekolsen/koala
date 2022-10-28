@@ -12,6 +12,8 @@ Alternatively, install the service unit as described below.
 
 ## Systemd
 
+Note: you will need to adjust `WorkingDirectory` and `ExecStart` to match your system in `koala.service`.
+
 ```
 ln -s $PWD/koala.service $HOME/.config/systemd/user/
 
