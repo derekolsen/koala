@@ -1,0 +1,10 @@
+[Unit]
+Description=Koala
+After=network.target
+
+[Service]
+WorkingDirectory=/home/derek/Development/koala
+ExecStart=/usr/local/koala
+
+[Install]
+WantedBy=multi-user.target

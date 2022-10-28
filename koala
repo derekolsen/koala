@@ -53,15 +53,12 @@ create_stream() {
         udp://${destination}:${port} 2> /dev/null &
     pids="$! $pids"
 
-    echo -e "\e[36m[${name}]"
-    printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
-    echo -e "\e[0mStreaming to \e[34mudp://${destination}:${port}\e[0m @ \e[33m${width}x${height}\e[0m on display ${DISPLAY}"
+    echo -e "\e[36m[${name}]: \e[0mStreaming to \e[34mudp://${destination}:${port}\e[0m @ \e[33m${width}x${height}\e[0m on display ${DISPLAY}"
     echo -e "URL: \e[32m${webpage}\e[0m"
-    echo
 }
 
 for stream in streams/*; do
     create_stream "$stream"
 done
 
-read -r -d '' _ </dev/tty
+wait $@
