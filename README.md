@@ -10,7 +10,7 @@ Afterwards, run with: `./koala`
 
 Alternatively, install the service unit as described below.
 
-## SystemD
+## Systemd
 
 ```
 ln -s $PWD/koala.service $HOME/.config/systemd/user/
