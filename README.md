@@ -1,31 +1,19 @@
 # koala
 
-Tested working on the current Ubuntu LTS 22.04.1
+## Usage
 
-Initialize i3 with:
-```
-cp /etc/i3/config ~/.config/i3/config
-```
+Create stream descriptor files using the `00-test` template in the streams folder. All files in that folder will be implemented as streams. Be careful to avoid using the same destination port in two different streams.
 
-`run.sh` creates a virtual framebuffer on display `:99` running chromium under i3 and points to `$URL`. FFMPEG creates an mpeg2 over UDP stream pointing at `$DEST`
-
-## Docker container
-
-Currently not working, see issues.
-
-```
-docker build -t koala-testing .
-docker run -p 10023:10023 koala-testing
-```
+Afterwards, run with: `./koala`
 
 ## Useful links
 
-[FFMPEG UDP](http://underpop.online.fr/f/ffmpeg/help/examples-120.htm.gz)
+[FFmpeg UDP](http://underpop.online.fr/f/ffmpeg/help/examples-120.htm.gz)
 
-[FFMPEG MPEG-TS](https://www.ffmpeg.org/ffmpeg-formats.html#mpegts-1)
+[FFmpeg MPEG-TS](https://www.ffmpeg.org/ffmpeg-formats.html#mpegts-1)
 
 [MPEG-TS Wikipedia](https://en.wikipedia.org/wiki/MPEG_transport_stream)
 
-[FFMPEG Streaming Guide](https://trac.ffmpeg.org/wiki/StreamingGuide)
+[FFmpeg Streaming Guide](https://trac.ffmpeg.org/wiki/StreamingGuide)
 
 [Chromium CLI Switches](https://peter.sh/experiments/chromium-command-line-switches/)

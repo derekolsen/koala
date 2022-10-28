@@ -1,0 +1,69 @@
+#!/bin/bash
+chromium="flatpak run com.github.Eloston.UngoogledChromium"
+pids=
+
+_end() {
+    echo -e "\e[31mShutting down Koala...\e[0m"
+    kill $pids 2> /dev/null
+    reset
+    exit 0
+}
+
+trap _end INT
+
+create_stream() {
+    local DISPLAY=:`shuf -i 99-999999999 -n1`
+    local width=1920
+    local height=1080
+    local colordepth=24
+    local framerate=30
+    local bitrate=6000
+
+    # parse config
+    while read line; do
+        # skip empty lines
+        [ -z "$line" ] && continue
+        # ignore comments
+        [[ $line == \#* ]] && continue
+        local "$line"
+    done < "$1"
+
+    Xvfb ${DISPLAY} -screen 0 ${width}x${height}x${colordepth} &
+    pids="$! $pids"
+
+    mkdir -p ${HOME}/.chromium
+
+    ${chromium} \
+        --user-data-dir=$(mktemp -d) \
+        --kiosk \
+        --fullscreen \
+        --window-position=0,0 \
+        --window-size=${width},${height} \
+        ${webpage} 2> /dev/null &
+    pids="$! $pids"
+
+    ffmpeg \
+        -video_size ${width}x${height} \
+        -y \
+        -r ${framerate} \
+        -f x11grab \
+        -draw_mouse 0 \
+        -s ${width}x${height} \
+        -i ${DISPLAY} \
+        -b:v ${bitrate}k \
+        -f mpegts \
+        udp://${destination}:${port} 2> /dev/null &
+    pids="$! $pids"
+
+    echo -e "\e[36m[${name}]"
+    printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
+    echo -e "\e[0mStreaming to \e[34mudp://${destination}:${port}\e[0m @ \e[33m${width}x${height}\e[0m on display ${DISPLAY}"
+    echo -e "URL: \e[32m${webpage}\e[0m"
+    echo
+}
+
+for stream in streams/*; do
+    create_stream "$stream"
+done
+
+read -r -d '' _ </dev/tty
