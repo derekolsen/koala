@@ -1,6 +1,6 @@
 # koala
 
-A web scraper that sends UDP video
+A web scraper that sends UDP video over a local network
 
 ## Usage
 
