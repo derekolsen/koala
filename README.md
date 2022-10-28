@@ -1,10 +1,23 @@
 # koala
 
+A web scraper that sends UDP video
+
 ## Usage
 
 Create stream descriptor files using the `00-test` template in the streams folder. All files in that folder will be implemented as streams. Be careful to avoid using the same destination port in two different streams.
 
 Afterwards, run with: `./koala`
+
+Alternatively, install the service unit as described below.
+
+## SystemD
+
+```
+ln -s $PWD/koala.service $HOME/.config/systemd/user/
+
+systemctl --user daemon-reload
+systemctl --user systemctl start koala.service
+```
 
 ## Useful links
 
