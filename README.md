@@ -4,9 +4,16 @@ A web scraper that sends UDP video over a local network
 
 ## Usage
 
+Requires the following applications:
+  - Xvfb
+  - Chromium
+  - FFmpeg
+
+Edit `chromium=...` in `koala` to point to your chromium binary.
+
 Create stream descriptor files using the `00-test` template in the streams folder. All files in that folder will be implemented as streams. Be careful to avoid using the same destination port in two different streams.
 
-Afterwards, run with: `./koala`
+Afterwards, run with: `./koala`.
 
 Alternatively, install the service unit as described below.
 
