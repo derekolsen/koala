@@ -4,7 +4,7 @@ pids=
 destinations=
 
 _end() {
-    stty sane
+    reset
     kill $pids 2> /dev/null
     [[ -z $1 ]] && echo -e "\e[31mShutting down Koala...\e[0m" && exit 0
     [[ $1 == 1 ]] && echo -e "\e[31m$2 is missing required values.\e[0m" && exit 1
@@ -42,7 +42,7 @@ create_stream() {
     Xvfb ${DISPLAY} -screen 0 ${width}x${height}x${colordepth} &
     pids="$! $pids"
 
-    ${chrome} \
+    DISPLAY=$DISPLAY ${chrome} \
         --user-data-dir=$(mktemp -d) \
         --kiosk \
         --fullscreen \
@@ -64,7 +64,7 @@ create_stream() {
         udp://${destination} 2> /dev/null &
     pids="$! $pids"
 
-    echo -e "\e[36m[${name}]: \e[0mStreaming to \e[34mudp://${destination}:${port}\e[0m @ \e[33m${width}x${height}x${colordepth}\e[0m"
+    echo -e "\e[36m[${name}]: \e[0mStreaming to \e[34mudp://${destination}\e[0m @ \e[33m${width}x${height}x${colordepth}\e[0m"
     echo -e "URL: \e[32m${webpage}\e[0m"
 }
 
