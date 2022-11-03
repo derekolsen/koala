@@ -3,8 +3,8 @@ Description=Koala
 After=network.target
 
 [Service]
-WorkingDirectory=/koala
-ExecStart=/koala/koala
+WorkingDirectory=/opt/koala
+ExecStart=/opt/koala/koala
 
 [Install]
-WantedBy=multi-user.target
+WantedBy=default.target

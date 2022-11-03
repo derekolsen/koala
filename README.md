@@ -2,6 +2,16 @@
 
 A web scraper that sends UDP video over a local network
 
+## Requirements
+
+Requires the following packages:
+
+- xvfb
+- chromium
+- ffmpeg
+
+Important: the $chrome environment variable must either be set to your chromium binary or manually changed in line 2 of `koala`
+
 ## Usage
 
 Create stream descriptor files using the `00-test` template in the streams folder. All files in that folder will be implemented as streams. Be careful to avoid using the same destination port in two different streams.
@@ -14,10 +24,16 @@ Alternatively, install the service unit as described below.
 
 ```
 cd koala
-ln -s $PWD /koala
+ln -s $PWD /opt/koala
 ln -s $PWD/koala.service $HOME/.config/systemd/user/
 systemctl --user daemon-reload
 systemctl --user systemctl start koala.service
+```
+
+Execute the following command when adding, removing, or modifying streams:
+
+```
+systemctl --user systemctl restart koala.service
 ```
 
 ## Useful links

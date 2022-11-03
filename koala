@@ -1,5 +1,5 @@
 #!/bin/bash
-chromium="flatpak run com.github.Eloston.UngoogledChromium"
+[ -z $chrome ] && chrome="chromium"
 pids=
 
 _end() {
@@ -31,7 +31,7 @@ create_stream() {
     Xvfb ${DISPLAY} -screen 0 ${width}x${height}x${colordepth} &
     pids="$! $pids"
 
-    ${chromium} \
+    ${chrome} \
         --user-data-dir=$(mktemp -d) \
         --kiosk \
         --fullscreen \

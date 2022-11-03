@@ -5,7 +5,7 @@
 # Required
 name=wallboard
 webpage=https://editor.wallboard.us/displayer/index.html#/87ba0422c82d4fd280925e31ac1709ac/Default?signageModeSecret=35b3cc6795534c488b2335c89ce25891
-destination=192.168.0.61
+destination=192.168.0.26
 port=10023
 
 # Optional (defaults shown here)

@@ -1,9 +1,3 @@
 Check for missing required params
 
 Check for same destination AND port (maybe combine destination and port)
-
-Create .deb for easy install?
-
-Move configuration to /etc/?
-
-Restart service when adding new stream configs
