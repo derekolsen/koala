@@ -10,13 +10,19 @@ Requires the following packages:
 - chromium
 - ffmpeg
 
-Important: the $chrome environment variable must either be set to your chromium binary or manually changed in line 2 of `koala`
+Important: The `$chrome` environment variable must either be set to your chromium binary or manually changed in line 2 of `koala`. By default, Koala uses the command `chromium`.
+
+Example:
+
+```
+export chrome="flatpak run com.github.Eloston.UngoogledChromium"
+```
 
 ## Usage
 
-Create stream descriptor files using the `00-test` template in the streams folder. All files in that folder will be implemented as streams. Be careful to avoid using the same destination port in two different streams.
+Create stream descriptor files using the `00-test` template in the streams folder. All files in that folder will be implemented as streams. Be careful to avoid using the same destination port in two different streams. Also, stream files are required to end with a newline (most editors do this by default).
 
-Afterwards, run with: `./koala`
+Afterwards, run with: `./koala`.
 
 Alternatively, install the service unit as described below.
 

@@ -1,12 +1,11 @@
 # This file describes all required and optional variables and is sourced by
 # Koala at runtime. Use it as a template and create a file in this folder
-# for each stream.
+# for each stream. 
 
 # Required
 name=wallboard
 webpage=https://editor.wallboard.us/displayer/index.html#/87ba0422c82d4fd280925e31ac1709ac/Default?signageModeSecret=35b3cc6795534c488b2335c89ce25891
-destination=192.168.0.26
-port=10023
+destination=192.168.0.26:10023
 
 # Optional (defaults shown here)
 width=1920
@@ -15,3 +14,4 @@ colordepth=24
 framerate=30
 bitrate=6000
 # Note: bitrate is measured in kilobits
+# 2nd note: make sure these files end with a newline
