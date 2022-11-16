@@ -4,15 +4,15 @@ pids=
 destinations=
 
 _end() {
-    reset
     kill $pids 2> /dev/null
+    reset
     [[ -z $1 ]] && echo -e "\e[31mShutting down Koala...\e[0m" && exit 0
     [[ $1 == 1 ]] && echo -e "\e[31m$2 is missing required values.\e[0m" && exit 1
     [[ $1 == 2 ]] && echo -e "\e[31m$2 contains a duplicate destination.\e[0m" && exit 2
     exit 127
 }
 
-function newline_check() {
+newline_check() {
     [[ $(tail -c1 "$1" | wc -l) -gt 0 ]]
 }
 
@@ -37,6 +37,7 @@ create_stream() {
 
     [[ -z "$name" || -z "$webpage" || -z "$webpage" ]] && _end 1 $1
 
+    # check for duplicate destinations
     for i in $destinations; do
         [ $i == $destination ] && _end 2 $1
     done
@@ -73,8 +74,7 @@ create_stream() {
 }
 
 for stream in streams/*; do
-    if ! newline_check "$stream"
-    then
+    if ! newline_check "$stream"; then
         echo "" >> "$stream"
     fi
     create_stream "$stream"
