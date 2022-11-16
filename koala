@@ -12,6 +12,10 @@ _end() {
     exit 127
 }
 
+function newline_check() {
+    [[ $(tail -c1 "$1" | wc -l) -gt 0 ]]
+}
+
 trap _end INT
 
 create_stream() {
@@ -69,6 +73,10 @@ create_stream() {
 }
 
 for stream in streams/*; do
+    if ! newline_check "$stream"
+    then
+        echo "" >> "$stream"
+    fi
     create_stream "$stream"
 done
 

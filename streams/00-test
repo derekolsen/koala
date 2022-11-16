@@ -14,4 +14,3 @@ colordepth=24
 framerate=30
 bitrate=6000
 # Note: bitrate is measured in kilobits
-# 2nd note: make sure these files end with a newline
