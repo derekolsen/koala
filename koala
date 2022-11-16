@@ -2,9 +2,18 @@
 [ -z "$chrome" ] && chrome="chromium"
 pids=
 destinations=
+out="/dev/null"
+
+# get options
+while [[ "$1" =~ ^- && ! "$1" == "--" ]]; do case $1 in
+  -v | --verbose )
+    out="/dev/stdout"
+    ;;
+esac; shift; done
+if [[ "$1" == '--' ]]; then shift; fi
 
 _end() {
-    kill $pids 2> /dev/null
+    kill $pids 2> $out
     reset
     [[ -z $1 ]] && echo -e "\e[31mShutting down Koala...\e[0m" && exit 0
     [[ $1 == 1 ]] && echo -e "\e[31m$2 is missing required values.\e[0m" && exit 1
@@ -53,7 +62,7 @@ create_stream() {
         --fullscreen \
         --window-position=0,0 \
         --window-size=${width},${height} \
-        ${webpage} 2> /dev/null &
+        ${webpage} 2> $out &
     pids="$! $pids"
 
     ffmpeg \
@@ -66,7 +75,7 @@ create_stream() {
         -i ${DISPLAY} \
         -b:v ${bitrate}k \
         -f mpegts \
-        udp://${destination} 2> /dev/null &
+        udp://${destination} 2> $out &
     pids="$! $pids"
 
     echo -e "\e[36m[${name}]: \e[0mStreaming to \e[34mudp://${destination}\e[0m @ \e[33m${width}x${height}x${colordepth}\e[0m"

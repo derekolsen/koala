@@ -20,7 +20,7 @@ export chrome="flatpak run com.github.Eloston.UngoogledChromium"
 
 ## Usage
 
-Create stream descriptor files using the `00-test` template in the streams folder. All files in that folder will be implemented as streams. Be careful to avoid using the same destination port in two different streams. Also, stream files are required to end with a newline (most editors do this by default).
+Create stream descriptor files using the `00-test` template in the streams folder. All files in that folder will be implemented as streams. Be careful to avoid using the same destination port in two different streams.
 
 Afterwards, run with: `./koala`.
 
@@ -28,9 +28,11 @@ Alternatively, install the service unit as described below.
 
 ## Testing
 
+Show verbose terminal output with `./koala -v` or `./koala --verbose`.
+
 To quickly test functionality, you may use VLC.
 
-Open VLC, navigate to `Media > Open Network Stream` and enter `udp://@:10022` replacing 10022 with whatever port your stream is pointing to
+Open VLC, navigate to `Media > Open Network Stream` and enter `udp://@:10022` replacing 10022 with whatever port your stream is pointing to.
 
 ## Systemd
 
