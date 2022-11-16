@@ -26,6 +26,12 @@ Afterwards, run with: `./koala`.
 
 Alternatively, install the service unit as described below.
 
+## Testing
+
+To quickly test functionality, you may use VLC.
+
+Open VLC, navigate to `Media > Open Network Stream` and enter `udp://@:10022` replacing 10022 with whatever port your stream is pointing to
+
 ## Systemd
 
 ```
