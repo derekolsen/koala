@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# If everything is working correctly, this script shouldn't do anything.
+# If everything is working correctly, this script shouldn't output anything.
 
 set -o pipefail
 koala_dir=$PWD
@@ -76,8 +76,9 @@ webpage=https://google.com
 destination=127.0.0.1:1338
 EOF
 koala_no_color > /dev/null &
-sleep 5s
-ps axf | grep ${koala_dir}/koala  | grep -v grep | awk '{print "kill -2 " $1}' | sh
+sleep 3s
+ps axf | grep ${koala_dir}/koala | grep -v grep | awk '{print "kill -2 " $1}' | sh
+sleep 2s
 ps -x | grep -A1 -P '^(?!.*grep).*Xvfb'
 assert $? 1
 ps -x | grep -A1 -P '^(?!.*grep).*kiosk'
