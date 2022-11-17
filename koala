@@ -1,11 +1,10 @@
 #!/bin/bash
 [ -z "$chrome" ] && chrome="chromium"
 
-pid_array=()
 destination_array=()
 out="/dev/null"
 
-# get options
+# Get options
 while [[ "$1" =~ ^- && ! "$1" == "--" ]]; do case $1 in
   -v | --verbose )
     out="/dev/stdout"
@@ -14,31 +13,41 @@ esac; shift; done
 if [[ "$1" == '--' ]]; then shift; fi
 
 _end() {
-    kill "${pid_array[@]}" 2> $out
-    [[ -z $1 ]] && echo -e "\e[31mShutting down Koala...\e[0m" && exit 0
+    # Inform console as to why we're terminating
+    [[ -z $1 ]] && echo -e "\e[31mTerminating normally\e[0m" && exit 0
     [[ $1 == 1 ]] && echo -e "\e[31m$2 is missing required value: $3\e[0m" && exit 1
     [[ $1 == 2 ]] && echo -e "\e[31m$2 contains a duplicate destination.\e[0m" && exit 2
-    exit 127
 }
 
+_exit() {
+    # Kill all child processes on exit
+    jobs="$(jobs -p)"; [ -n "$jobs" ] && kill $jobs
+}
+
+# Trap interrupts and exits
 trap _end INT
+trap _exit EXIT
 
 newline_check() {
+    # Boolean of whether a file ends with a newline
     [[ $(tail -c1 "$1" | wc -l) -gt 0 ]]
 }
 
 create_stream() {
+    # Find an unused display server number
     local Xdisplay=1000
     while [ -f /tmp/.X${Xdisplay}-lock ]; do
         ((Xdisplay+=1))
     done
+
+    # Initialize sane defaults
     local width=1920
     local height=1080
     local colordepth=24
     local framerate=30
     local bitrate=6000
 
-    # parse config
+    # Parse config
     while read line; do
         # skip empty lines
         [ -z "$line" ] && continue
@@ -47,23 +56,24 @@ create_stream() {
         local "$line"
     done < "$1"
 
+    # Check for required stream variables
     [[ -z "$name" ]] && _end 1 $1 name
     [[ -z "$webpage" ]] && _end 1 $1 webpage
     [[ -z "$destination" ]] && _end 1 $1 destination
 
-    # check for duplicate destinations
+    # Check for duplicate destinations
     for i in ${destination_array[@]}; do
         [ $i == $destination ] && _end 2 $1
     done
-
     destination_array+=($destination)
 
+    # Create a new virtual X server
     Xvfb :${Xdisplay} -screen 0 ${width}x${height}x${colordepth} &
-    pid_array+=($!)
     until [ -f /tmp/.X${Xdisplay}-lock ]; do
-            sleep .01s
+        sleep .01s
     done
 
+    # Start chromium
     DISPLAY=:$Xdisplay ${chrome} \
         --user-data-dir=$(mktemp -d) \
         --kiosk \
@@ -71,8 +81,8 @@ create_stream() {
         --window-position=0,0 \
         --window-size=${width},${height} \
         ${webpage} 2> $out &
-    pid_array+=($!)
 
+    # Start ffmpeg
     ffmpeg \
         -video_size ${width}x${height} \
         -y \
@@ -84,12 +94,13 @@ create_stream() {
         -b:v ${bitrate}k \
         -f mpegts \
         udp://${destination} 2> $out &
-    pid_array+=($!)
 
+    # Console output
     echo -e "\e[36m[${name}]: \e[0mStreaming to \e[34mudp://${destination}\e[0m @ \e[33m${width}x${height}x${colordepth}\e[0m (:${Xdisplay})"
     echo -e "URL: \e[32m${webpage}\e[0m"
 }
 
+# Run create_stream for each file in streams directory
 for stream in streams/*; do
     if ! newline_check "$stream"; then
         echo "" >> "$stream"
@@ -97,4 +108,5 @@ for stream in streams/*; do
     create_stream "$stream"
 done
 
-wait $@
+# Keep main process running
+wait
