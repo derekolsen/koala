@@ -1,0 +1,75 @@
+#!/bin/bash
+
+# If everything is working correctly, this script shouldn't do anything.
+
+set -o pipefail
+cd ..
+koala_dir=$PWD
+
+koala() {
+  ${koala_dir}/koala | sed 's/\x1B\[[0-9;]\{1,\}[A-Za-z]//g'
+}
+
+assert() {
+  [[ $1 == $2 ]] || echo Assertion failed at line `caller`
+}
+
+assert_koala() {
+  local output=$(koala)
+  if [[ "$output" != "$@" ]]; then
+    echo Assertion failed at line `caller`
+    echo Expected:
+    echo "$@"
+    echo Got:
+    echo $output
+  fi
+}
+
+# test for missing name
+cd `mktemp -d` && mkdir streams
+cat << EOF > streams/test-stream
+webpage=https://google.com
+destination=127.0.0.1:1337
+EOF
+assert_koala "streams/test-stream is missing required value: name"
+
+# test for missing webpage
+cd `mktemp -d` && mkdir streams
+cat << EOF > streams/test-stream
+name=test
+destination=127.0.0.1:1337
+EOF
+assert_koala "streams/test-stream is missing required value: webpage"
+
+# test for missing destination
+cd `mktemp -d` && mkdir streams
+cat << EOF > streams/test-stream
+name=test
+webpage=https://google.com
+EOF
+assert_koala "streams/test-stream is missing required value: destination"
+
+# test for duplicate destinations
+cd `mktemp -d` && mkdir streams
+cat << EOF > streams/test-stream
+name=test
+webpage=https://google.com
+destination=127.0.0.1:1337
+EOF
+cat << EOF > streams/test-stream2
+name=test2
+webpage=https://google.com
+destination=127.0.0.1:1337
+EOF
+koala > /dev/null
+assert $? 2
+
+# test that all processes are exited when shutting down
+koala > /dev/null &
+kill -SIGINT $!
+ps -x | grep -A1 -P '^(?!.*grep).*Xvfb'
+assert $? 1
+ps -x | grep -A1 -P '^(?!.*grep).*kiosk'
+assert $? 1
+ps -x | grep -A1 -P '^(?!.*grep).*ffmpeg'
+assert $? 1
