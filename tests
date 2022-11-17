@@ -5,7 +5,7 @@
 set -o pipefail
 koala_dir=$PWD
 
-koala() {
+koala_no_color() {
   ${koala_dir}/koala | sed 's/\x1B\[[0-9;]\{1,\}[A-Za-z]//g'
 }
 
@@ -14,7 +14,7 @@ assert() {
 }
 
 assert_koala() {
-  local output=$(koala)
+  local output=$(koala_no_color)
   if [[ "$output" != "$@" ]]; then
     echo Assertion failed at line `caller`
     echo Expected:
@@ -60,12 +60,24 @@ name=test2
 webpage=https://google.com
 destination=127.0.0.1:1337
 EOF
-koala > /dev/null
+koala_no_color > /dev/null
 assert $? 2
 
 # test that all processes are exited when shutting down
-koala > /dev/null &
-kill -SIGINT $!
+cd `mktemp -d` && mkdir streams
+cat << EOF > streams/test-stream
+name=test
+webpage=https://google.com
+destination=127.0.0.1:1337
+EOF
+cat << EOF > streams/test-stream2
+name=test2
+webpage=https://google.com
+destination=127.0.0.1:1338
+EOF
+koala_no_color > /dev/null &
+sleep 5s
+ps axf | grep ${koala_dir}/koala  | grep -v grep | awk '{print "kill -2 " $1}' | sh
 ps -x | grep -A1 -P '^(?!.*grep).*Xvfb'
 assert $? 1
 ps -x | grep -A1 -P '^(?!.*grep).*kiosk'
