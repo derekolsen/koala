@@ -2,7 +2,7 @@
 
 # If everything is working correctly, this script shouldn't output anything.
 # Note: this script parses `ps` for some assertions and may misbehave on
-# some systems
+#       some systems
 
 set -o pipefail
 koala_dir=$PWD
@@ -12,7 +12,13 @@ koala_no_color() {
 }
 
 assert() {
-  [[ $1 == $2 ]] || echo Assertion failed at line `caller`
+  if [[ $1 != $2 ]]; then
+    echo Assertion failed at line `caller`
+    echo Expected:
+    echo $1
+    echo Got:
+    echo $2
+  fi
 }
 
 assert_koala() {

@@ -1,13 +1,16 @@
 #!/bin/bash
+
+# Check for environment-informed chromium binary or otherwise set one
+# This can be modified for your use-case
 [ -z "$chrome" ] && chrome="chromium"
 
 destination_array=()
-out="/dev/null"
+stderr="/dev/null"
 
 # Get options
 while [[ "$1" =~ ^- && ! "$1" == "--" ]]; do case $1 in
   -v | --verbose )
-    out="/dev/stdout"
+    stderr="/dev/stdout"
     ;;
 esac; shift; done
 if [[ "$1" == '--' ]]; then shift; fi
@@ -80,7 +83,7 @@ create_stream() {
         --fullscreen \
         --window-position=0,0 \
         --window-size=${width},${height} \
-        ${webpage} 2> $out &
+        ${webpage} 2> $stderr &
 
     # Start ffmpeg
     ffmpeg \
@@ -93,7 +96,7 @@ create_stream() {
         -i :${Xdisplay} \
         -b:v ${bitrate}k \
         -f mpegts \
-        udp://${destination} 2> $out &
+        udp://${destination} 2> $stderr &
 
     # Console output
     echo -e "\e[36m[${name}]: \e[0mStreaming to \e[34mudp://${destination}\e[0m @ \e[33m${width}x${height}x${colordepth}\e[0m (:${Xdisplay})"
