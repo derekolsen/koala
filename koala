@@ -44,7 +44,7 @@ create_stream() {
         local "$line"
     done < "$1"
 
-    [[ -z "$name" || -z "$webpage" || -z "$webpage" ]] && _end 1 $1
+    [[ -z "$name" || -z "$webpage" || -z "$destination" ]] && _end 1 $1
 
     # check for duplicate destinations
     for i in $destinations; do
