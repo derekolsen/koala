@@ -3,7 +3,6 @@
 # If everything is working correctly, this script shouldn't do anything.
 
 set -o pipefail
-cd ..
 koala_dir=$PWD
 
 koala() {
