@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Check for environment-informed chromium binary or otherwise set one
-# This can be modified for your use-case
+# This can be modified for your use case
 [ -z "$chrome" ] && chrome="chromium"
 
 destination_array=()
