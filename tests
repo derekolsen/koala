@@ -5,30 +5,32 @@
 #       some systems
 
 set -o pipefail
-koala_dir=$PWD
+koala=${PWD}/koala
 
-koala_no_color() {
-  ${koala_dir}/koala | sed 's/\x1B\[[0-9;]\{1,\}[A-Za-z]//g'
+strip_color() {
+  sed 's/\x1B\[[0-9;]\{1,\}[A-Za-z]//g'
 }
 
 assert() {
   if [[ $1 != $2 ]]; then
-    echo -e "\e[31mAssertion failed at line `caller`\e[0m"
-    echo -e "\e[32mExpected:\e[0m"
-    echo $1
-    echo -e "\e[31mGot:\e[0m"
-    echo $2
+    echo "Assertion failed at line `caller`"
+    echo "Expected:"
+    echo -e "\e[32m$1\e[0m"
+    echo "Got:"
+    echo -e "\e[31m$2\e[0m"
+    exit 1
   fi
 }
 
 assert_koala() {
-  local output=$(koala_no_color)
+  local output=$($koala | strip_color)
   if [[ "$output" != "$@" ]]; then
-    echo -e "\e[31mAssertion failed at line `caller`\e[0m"
-    echo -e "\e[32mExpected:\e[0m"
-    echo "$@"
-    echo -e "\e[31mGot:\e[0m"
-    echo $output
+    echo "Assertion failed at line `caller`"
+    echo "Expected:"
+    echo -e "\e[32m$@\e[0m"
+    echo "Got:"
+    echo -e "\e[31m$output\e[0m"
+    exit 2
   fi
 }
 
@@ -43,58 +45,94 @@ assert_koala "Stream directory '${PWD}/streams' is empty."
 # test for missing name
 cd `mktemp -d` && mkdir streams
 cat << EOF > streams/test-stream
-webpage=https://google.com
+url=https://google.com
 destination=127.0.0.1:1337
 EOF
 assert_koala "'${PWD}/streams/test-stream' is missing required value: name"
 
-# test for missing webpage
+# test for missing url (directory-mode)
 cd `mktemp -d` && mkdir streams
 cat << EOF > streams/test-stream
 name=test
 destination=127.0.0.1:1337
 EOF
-assert_koala "'${PWD}/streams/test-stream' is missing required value: webpage"
+$koala | strip_color > /dev/null
+assert 1 $?
 
-# test for missing destination
+# test for missing destination (directory-mode)
 cd `mktemp -d` && mkdir streams
 cat << EOF > streams/test-stream
 name=test
-webpage=https://google.com
+url=https://google.com
 EOF
-assert_koala "'${PWD}/streams/test-stream' is missing required value: destination"
+$koala | strip_color > /dev/null
+assert 1 $?
+
+# test for missing url (oneshot-mode)
+cd `mktemp -d`
+$koala -o -d 127.0.0.1:1337 | strip_color > /dev/null
+assert 1 $?
+
+# test for missing destination (oneshot-mode)
+$koala -o -u https://google.com | strip_color > /dev/null
+assert 1 $?
 
 # test for duplicate destinations
 cd `mktemp -d` && mkdir streams
 cat << EOF > streams/test-stream
 name=test
-webpage=https://google.com
+url=https://google.com
 destination=127.0.0.1:1337
 EOF
 cat << EOF > streams/test-stream2
 name=test2
-webpage=https://google.com
+url=https://google.com
 destination=127.0.0.1:1337
 EOF
-koala_no_color > /dev/null
-assert $? 2
+$koala | strip_color > /dev/null
+assert 2 $?
 
-# test that all processes are exited when shutting down
+# test file mode
+set -e
 cd `mktemp -d` && mkdir streams
 cat << EOF > streams/test-stream
 name=test
-webpage=https://google.com
+url=https://google.com
+destination=127.0.0.1:1337
+EOF
+$koala -f streams/test-stream | strip_color > /dev/null &
+sleep 3s
+kill $(jobs -p)
+sleep 3s
+set +e
+
+# test oneshot mode
+set -e
+cd `mktemp -d`
+$koala -o -u https://google.com -d 127.0.0.1:1337 | strip_color > /dev/null &
+sleep 3s
+kill $(jobs -p)
+sleep 3s
+set +e
+
+# test that all processes are exited when shutting down
+set -e
+cd `mktemp -d` && mkdir streams
+cat << EOF > streams/test-stream
+name=test
+url=https://google.com
 destination=127.0.0.1:1337
 EOF
 cat << EOF > streams/test-stream2
 name=test2
-webpage=https://google.com
+url=https://google.com
 destination=127.0.0.1:1338
 EOF
-koala_no_color > /dev/null &
+$koala | strip_color > /dev/null &
 sleep 3s
-ps x | grep ${koala_dir}/koala | grep -v grep | awk '{print "kill -2 " $1}' | sh
+kill $(jobs -p)
 sleep 3s
+set +e
 ps x | grep -v grep | grep Xvfb
 assert 1 $?
 ps x | grep -v grep | grep kiosk

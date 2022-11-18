@@ -9,8 +9,9 @@ Requires the following packages:
 - xvfb
 - chromium
 - ffmpeg
+- libxcb
 
-By default, Koala uses the command `chromium` to launch a browser in kiosk mode. If your system is using a Flatpak build of chromium or chromium is not in your $PATH, the `$chrome` environment variable must either be set to your chromium binary or manually changed in line 5 of `koala`. 
+By default, Koala uses the command `chromium` to launch a browser in kiosk mode. If your system is using a Flatpak build of chromium or chromium is not in your $PATH, the `$chrome` environment variable must either be set to your chromium command or manually changed in line 8 of `koala`. 
 
 Examples:
 
@@ -26,11 +27,48 @@ export chrome="flatpak run com.github.Eloston.UngoogledChromium"
 
 ## Usage
 
+```
+koala [OPTION ...]
+
+Options:
+-v         --verbose                      show debug logs
+-f FILE    --file FILE                    single-file mode, FILE should
+                                          be a stream descriptor file
+ 
+-o         --oneshot                      enables oneshot mode (one-liner),
+                                          required for all following options
+
+-d IP:PORT --dest, --destination IP:PORT  destination for UDP stream
+-u URL     --url URL                      URL of webpage
+-w WIDTH   --width WIDTH                  width in pixels
+-h HEIGHT  --height HEIGHT                height in pixels
+-c DEPTH   --colordepth DEPTH             colordepth (unstable)
+-r RATE    --framerate RATE               framerate in FPS
+-b RATE    --bitrate RATE                 bitrate in kilobits
+```
+
+### Normal Mode
+
 Create stream descriptor files using the `00-test` template in the streams folder. All files in that folder will be implemented as streams. Be careful to avoid using the same destination port in two different streams.
 
 Afterwards, run with: `./koala`.
 
 Alternatively, install the service unit with Systemd as described below.
+
+### File Mode
+
+A single stream descriptor file can be loaded using `./koala -f $FILE`.
+
+### Oneshot Mode
+
+A stream can be run using a one-liner with just a URL and destination:
+
+```
+./koala -o -u https://www.youtube.com/watch?v=9kaIXkImCAM -d 127.0.0.1:1337
+```
+
+Other options available are described in the usage table above.
+
 
 ## Systemd Installation
 

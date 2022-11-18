@@ -2,41 +2,114 @@
 
 # Check for environment-informed chromium binary or otherwise set one
 # This can be modified for your use case
+
+set -e
+
 [ -z "$chrome" ] && chrome="chromium"
 
 streams=$PWD/streams
 stderr="/dev/null"
 destination_array=()
-
-# Get options
-while [[ "$1" =~ ^- && ! "$1" == "--" ]]; do case $1 in
-  -v | --verbose )
-    stderr="/dev/stdout"
-    ;;
-esac; shift; done
-if [[ "$1" == '--' ]]; then shift; fi
+oneshot=false
+original_tty_state=$(stty -g)
 
 _end() {
     # Inform console as to why we're terminating
-    [[ -z $1 ]] && echo -e "\e[31mTerminating normally\e[0m" && exit 0
+    [[ -z $1 ]] && echo "Terminating normally" && exit 0
     [[ $1 == 1 ]] && echo -e "\e[31m'$2' is missing required value: $3\e[0m" && exit 1
+    [[ $1 == 6 ]] && echo -e "\e[31mMissing required value: $2\e[0m" && exit 1
     [[ $1 == 2 ]] && echo -e "\e[31m'$2' contains a duplicate destination.\e[0m" && exit 2
     [[ $1 == 3 ]] && echo -e "\e[31mCould not find stream directory '${streams}'.\e[0m" && exit 3
     [[ $1 == 4 ]] && echo -e "\e[31mStream directory '${streams}' is empty.\e[0m" && exit 4
+    [[ $1 == 5 ]] && echo -e "\e[31mStream file '$2' does not exist.\e[0m" && exit 5
 }
 
 _exit() {
     # Kill all child processes on exit
-    jobs="$(jobs -p)"; [ -n "$jobs" ] && kill $jobs
+    jobs="$(jobs -p)"; [ -n "$jobs" ] && kill $jobs 2> $stderr
+    stty $original_tty_state
 }
 
 # Trap interrupts and exits
 trap _end INT
 trap _exit EXIT
 
-newline_check() {
-    # Boolean of whether a file ends with a newline
-    [[ $(tail -c1 "$1" | wc -l) -gt 0 ]]
+usage() {
+    cat << EOF
+Usage: koala [OPTION ...]
+A web scraper that sends UDP video over a local network
+Options:
+-v         --verbose                      show debug logs
+-f FILE    --file FILE                    single-file mode, FILE should
+                                          be a stream descriptor file
+ 
+-o         --oneshot                      enables oneshot mode (one-liner),
+                                          required for all following options
+
+-d IP:PORT --dest, --destination IP:PORT  destination for UDP stream
+-u URL     --url URL                      URL of webpage
+-w WIDTH   --width WIDTH                  width in pixels
+-h HEIGHT  --height HEIGHT                height in pixels
+-c DEPTH   --colordepth DEPTH             colordepth (unstable)
+-r RATE    --framerate RATE               framerate in FPS
+-b RATE    --bitrate RATE                 bitrate in kilobits
+EOF
+}
+
+default_env() {
+    # Initialize sane defaults
+    width=1920
+    height=1080
+    colordepth=24
+    framerate=30
+    bitrate=6000
+}
+default_env
+
+# Get options
+while [[ "$1" =~ ^- && ! "$1" == "--" ]]; do case $1 in
+  -v | --verbose )
+    stderr="/dev/stdout"
+    ;;
+  -f | --file )
+    shift; file=$1
+    [[ -f $file ]] || _end 5 $file
+    ;;
+  -o | --oneshot )
+    oneshot=true
+    ;;
+  -d | --dest | --destination )
+    shift; destination=$1
+    ;;
+  -u | --url )
+    shift; url=$1
+    ;;
+  -x | --width )
+    shift; width=$1
+    ;;
+  -y | --height )
+    shift; height=$1
+    ;;
+  -c | --colordepth )
+    shift; colordepth=$1
+    ;;
+  -r | --framerate )
+    shift; framerate=$1
+    ;;
+  -b | --bitrate )
+    shift; bitrate=$1
+    ;;
+  -h | --help )
+    usage; exit
+    ;;
+esac; shift; done
+if [[ "$1" == '--' ]]; then shift; fi
+
+newline_fix() {
+    # Add newline to stream file if needed
+    if [ ! "$(tail -c1 "$1")" == "" ]; then
+        echo "" >> "$1"
+    fi
 }
 
 create_stream() {
@@ -46,26 +119,23 @@ create_stream() {
         ((Xdisplay+=1))
     done
 
-    # Initialize sane defaults
-    local width=1920
-    local height=1080
-    local colordepth=24
-    local framerate=30
-    local bitrate=6000
-
-    # Parse config
-    while read line; do
-        # skip empty lines
-        [ -z "$line" ] && continue
-        # ignore comments
-        [[ $line == \#* ]] && continue
-        local "$line"
-    done < "$1"
+    # Parse config if provided
+    if [[ -e "$1" ]]; then
+        while read line; do
+            # skip empty lines
+            [ -z "$line" ] && continue
+            # ignore comments
+            [[ $line == \#* ]] && continue
+            local "$line"
+        done < "$1"
+    fi
 
     # Check for required stream variables
-    [[ -z "$name" ]] && _end 1 $1 name
-    [[ -z "$webpage" ]] && _end 1 $1 webpage
-    [[ -z "$destination" ]] && _end 1 $1 destination
+    [[ -z "$name" ]] && [[ -n $1 ]] && _end 1 $1 name
+    [[ -z "$url" ]] && [[ -n $1 ]] && _end 1 $1 url
+    [[ -z "$destination" ]] && [[ -n $1 ]] && _end 1 $1 destination
+    [[ -z "$url" ]] && [[ -z $1 ]] && _end 6 url
+    [[ -z "$destination" ]] && [[ -z $1 ]] && _end 6 destination
 
     # Check for duplicate destinations
     for i in ${destination_array[@]}; do
@@ -87,7 +157,7 @@ create_stream() {
         --fullscreen \
         --window-position=0,0 \
         --window-size=${width},${height} \
-        ${webpage} 2> $stderr &
+        ${url} 2> $stderr &
 
     # Start ffmpeg
     ffmpeg \
@@ -103,21 +173,32 @@ create_stream() {
         udp://${destination} 2> $stderr &
 
     # Console output
-    echo -e "\e[36m[${name}]: \e[0mStreaming to \e[34mudp://${destination}\e[0m @ \e[33m${width}x${height}x${colordepth}\e[0m (:${Xdisplay})"
-    echo -e "URL: \e[32m${webpage}\e[0m"
+    if [[ -z "$1" ]]; then
+        echo -e "Streaming to \e[34mudp://${destination}\e[0m @ \e[33m${width}x${height}x${colordepth}\e[0m (:${Xdisplay})"
+    else
+        echo -e "\e[36m[${name}]: \e[0mStreaming to \e[34mudp://${destination}\e[0m @ \e[33m${width}x${height}x${colordepth}\e[0m (:${Xdisplay})"
+    fi
+    echo -e "URL: \e[32m${url}\e[0m"
 }
 
-# Check if stream directory exists and is not empty
-[ -d ${streams} ] || _end 3
-[ "$(ls ${streams})" ] || _end 4
+# Check if file is provided
+if [[ -e "${file}" ]]; then
+    newline_fix "$file"
+    create_stream "$file"
+elif $oneshot; then
+    create_stream
+else
+    # Check if stream directory exists and is not empty
+    [[ -d ${streams} ]] || _end 3
+    [[ "$(ls ${streams})" ]] || _end 4
 
-# Run create_stream for each file in streams directory
-for stream in ${streams}/*; do
-    if ! newline_check "$stream"; then
-        echo "" >> "$stream"
-    fi
-    create_stream "$stream"
-done
+    # Run create_stream for each file in streams directory
+    for stream in ${streams}/*; do
+        newline_fix "$stream"
+        default_env
+        create_stream "$stream"
+    done
+fi
 
 # Keep main process running
 wait

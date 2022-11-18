@@ -3,8 +3,8 @@
 # for each stream. 
 
 # Required
-name=wallboard
-webpage=https://editor.wallboard.us/displayer/index.html#/87ba0422c82d4fd280925e31ac1709ac/Default?signageModeSecret=35b3cc6795534c488b2335c89ce25891
+name=Animation
+url=https://animejs.com/
 destination=127.0.0.1:10023
 
 # Optional (defaults shown here)
