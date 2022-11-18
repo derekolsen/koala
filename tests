@@ -1,6 +1,8 @@
 #!/bin/bash
 
-# If everything is working correctly, this script shouldn't output anything.
+# If everything is working correctly, this script shouldn't output anything
+# after about 20 seconds.
+#
 # Note: this script parses `ps` for some assertions and may misbehave on
 #       some systems
 
