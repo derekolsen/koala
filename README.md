@@ -32,6 +32,8 @@ koala [OPTION ...]
 
 Options:
 -v         --verbose                      show debug logs
+-h         --help                         display this usage message and exit
+
 -f FILE    --file FILE                    single-file mode, FILE should
                                           be a stream descriptor file
  
@@ -40,8 +42,8 @@ Options:
 
 -d IP:PORT --dest, --destination IP:PORT  destination for UDP stream
 -u URL     --url URL                      URL of webpage
--w WIDTH   --width WIDTH                  width in pixels
--h HEIGHT  --height HEIGHT                height in pixels
+-x WIDTH   --width WIDTH                  width in pixels
+-y HEIGHT  --height HEIGHT                height in pixels
 -c DEPTH   --colordepth DEPTH             colordepth (unstable)
 -r RATE    --framerate RATE               framerate in FPS
 -b RATE    --bitrate RATE                 bitrate in kilobits
