@@ -4,8 +4,9 @@
 # This can be modified for your use case
 [ -z "$chrome" ] && chrome="chromium"
 
-destination_array=()
+streams=$PWD/streams
 stderr="/dev/null"
+destination_array=()
 
 # Get options
 while [[ "$1" =~ ^- && ! "$1" == "--" ]]; do case $1 in
@@ -18,8 +19,10 @@ if [[ "$1" == '--' ]]; then shift; fi
 _end() {
     # Inform console as to why we're terminating
     [[ -z $1 ]] && echo -e "\e[31mTerminating normally\e[0m" && exit 0
-    [[ $1 == 1 ]] && echo -e "\e[31m$2 is missing required value: $3\e[0m" && exit 1
-    [[ $1 == 2 ]] && echo -e "\e[31m$2 contains a duplicate destination.\e[0m" && exit 2
+    [[ $1 == 1 ]] && echo -e "\e[31m'$2' is missing required value: $3\e[0m" && exit 1
+    [[ $1 == 2 ]] && echo -e "\e[31m'$2' contains a duplicate destination.\e[0m" && exit 2
+    [[ $1 == 3 ]] && echo -e "\e[31mCould not find stream directory '${streams}'.\e[0m" && exit 3
+    [[ $1 == 4 ]] && echo -e "\e[31mStream directory '${streams}' is empty.\e[0m" && exit 4
 }
 
 _exit() {
@@ -104,8 +107,12 @@ create_stream() {
     echo -e "URL: \e[32m${webpage}\e[0m"
 }
 
+# Check if stream directory exists and is not empty
+[ -d ${streams} ] || _end 3
+[ "$(ls ${streams})" ] || _end 4
+
 # Run create_stream for each file in streams directory
-for stream in streams/*; do
+for stream in ${streams}/*; do
     if ! newline_check "$stream"; then
         echo "" >> "$stream"
     fi

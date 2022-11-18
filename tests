@@ -13,10 +13,10 @@ koala_no_color() {
 
 assert() {
   if [[ $1 != $2 ]]; then
-    echo Assertion failed at line `caller`
-    echo Expected:
+    echo -e "\e[31mAssertion failed at line `caller`\e[0m"
+    echo -e "\e[32mExpected:\e[0m"
     echo $1
-    echo Got:
+    echo -e "\e[31mGot:\e[0m"
     echo $2
   fi
 }
@@ -24,13 +24,21 @@ assert() {
 assert_koala() {
   local output=$(koala_no_color)
   if [[ "$output" != "$@" ]]; then
-    echo Assertion failed at line `caller`
-    echo Expected:
+    echo -e "\e[31mAssertion failed at line `caller`\e[0m"
+    echo -e "\e[32mExpected:\e[0m"
     echo "$@"
-    echo Got:
+    echo -e "\e[31mGot:\e[0m"
     echo $output
   fi
 }
+
+# test for missing stream directory
+cd `mktemp -d`
+assert_koala "Could not find stream directory '${PWD}/streams'."
+
+# test for empty stream directory
+cd `mktemp -d` && mkdir streams
+assert_koala "Stream directory '${PWD}/streams' is empty."
 
 # test for missing name
 cd `mktemp -d` && mkdir streams
@@ -38,7 +46,7 @@ cat << EOF > streams/test-stream
 webpage=https://google.com
 destination=127.0.0.1:1337
 EOF
-assert_koala "streams/test-stream is missing required value: name"
+assert_koala "'${PWD}/streams/test-stream' is missing required value: name"
 
 # test for missing webpage
 cd `mktemp -d` && mkdir streams
@@ -46,7 +54,7 @@ cat << EOF > streams/test-stream
 name=test
 destination=127.0.0.1:1337
 EOF
-assert_koala "streams/test-stream is missing required value: webpage"
+assert_koala "'${PWD}/streams/test-stream' is missing required value: webpage"
 
 # test for missing destination
 cd `mktemp -d` && mkdir streams
@@ -54,7 +62,7 @@ cat << EOF > streams/test-stream
 name=test
 webpage=https://google.com
 EOF
-assert_koala "streams/test-stream is missing required value: destination"
+assert_koala "'${PWD}/streams/test-stream' is missing required value: destination"
 
 # test for duplicate destinations
 cd `mktemp -d` && mkdir streams
@@ -85,11 +93,11 @@ destination=127.0.0.1:1338
 EOF
 koala_no_color > /dev/null &
 sleep 3s
-ps axf | grep ${koala_dir}/koala | grep -v grep | awk '{print "kill -2 " $1}' | sh
+ps x | grep ${koala_dir}/koala | grep -v grep | awk '{print "kill -2 " $1}' | sh
 sleep 3s
-ps -x | grep -A1 -P '^(?!.*grep).*Xvfb'
+ps x | grep -v grep | grep Xvfb
 assert 1 $?
-ps -x | grep -A1 -P '^(?!.*grep).*kiosk'
+ps x | grep -v grep | grep kiosk
 assert 1 $?
-ps -x | grep -A1 -P '^(?!.*grep).*ffmpeg'
+ps x | grep -v grep | grep ffmpeg
 assert 1 $?
