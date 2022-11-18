@@ -86,10 +86,10 @@ EOF
 koala_no_color > /dev/null &
 sleep 3s
 ps axf | grep ${koala_dir}/koala | grep -v grep | awk '{print "kill -2 " $1}' | sh
-sleep 2s
+sleep 3s
 ps -x | grep -A1 -P '^(?!.*grep).*Xvfb'
-assert $? 1
+assert 1 $?
 ps -x | grep -A1 -P '^(?!.*grep).*kiosk'
-assert $? 1
+assert 1 $?
 ps -x | grep -A1 -P '^(?!.*grep).*ffmpeg'
-assert $? 1
+assert 1 $?
