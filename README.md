@@ -11,7 +11,10 @@ Requires the following packages:
 - ffmpeg
 - libxcb
 
-By default, Koala uses the command `chromium` to launch a browser in kiosk mode. If your system is using a Flatpak build of chromium or chromium is not in your $PATH, the `$chrome` environment variable must either be set to your chromium command or manually changed in line 8 of `koala`. 
+By default, Koala uses the command `chromium` to launch a browser in kiosk mode.
+If your system is using a Flatpak build of chromium or chromium is not in your
+$PATH, the `$chrome` environment variable must either be set to your chromium
+command or manually changed in line 8 of `koala`. 
 
 Examples:
 
@@ -51,7 +54,9 @@ Options:
 
 ### Normal Mode
 
-Create stream descriptor files using the `00-defaults` template in the streams folder. All files in that folder will be implemented as streams. Be careful to avoid using the same destination port in two different streams.
+Create stream descriptor files using the `00-defaults` template in the streams
+folder. All files in that folder will be implemented as streams.
+Be careful to avoid using the same destination port in two different streams.
 
 Afterwards, run with: `./koala`.
 
@@ -69,7 +74,7 @@ A stream can be run using a one-liner with just a URL and destination:
 ./koala -o -u https://www.youtube.com/watch?v=9kaIXkImCAM -d 127.0.0.1:1337
 ```
 
-Other options available are described in the usage table above.
+Other available options are described in the usage table above.
 
 
 ## Systemd Installation
@@ -95,7 +100,9 @@ A `tests` script is provided to test exceptions and terminations.
 
 To test main functionality, you may use VLC.
 
-Open VLC, navigate to `Media > Open Network Stream` and enter `udp://@:$PORT` replacing $PORT with which port your stream is pointing to.
+Open VLC, navigate to `Media > Open Network Stream` and enter `udp://@:$PORT`
+replacing $PORT with which port your stream is pointing to. `00-default` uses
+port 10023.
 
 Show verbose terminal output with `./koala -v` or `./koala --verbose`.
 
