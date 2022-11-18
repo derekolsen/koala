@@ -10,12 +10,18 @@ Requires the following packages:
 - chromium
 - ffmpeg
 
-Important: The `$chrome` environment variable must either be set to your chromium binary or manually changed in line 2 of `koala`. By default, Koala uses the command `chromium`.
+By default, Koala uses the command `chromium` to launch a browser in kiosk mode. If your system is using a Flatpak build of chromium or chromium is not in your $PATH, the `$chrome` environment variable must either be set to your chromium binary or manually changed in line 5 of `koala`. 
 
-Example:
+Examples:
 
 ```
 export chrome="flatpak run com.github.Eloston.UngoogledChromium"
+```
+
+```
+...
+[ -z "$chrome" ] && chrome="flatpak run com.github.Eloston.UngoogledChromium"
+...
 ```
 
 ## Usage
@@ -24,31 +30,34 @@ Create stream descriptor files using the `00-test` template in the streams folde
 
 Afterwards, run with: `./koala`.
 
-Alternatively, install the service unit as described below.
+Alternatively, install the service unit with Systemd as described below.
 
-## Testing
-
-Show verbose terminal output with `./koala -v` or `./koala --verbose`.
-
-To quickly test functionality, you may use VLC.
-
-Open VLC, navigate to `Media > Open Network Stream` and enter `udp://@:10022` replacing 10022 with whatever port your stream is pointing to.
-
-## Systemd
+## Systemd Installation
 
 ```
 cd koala
 ln -s $PWD /opt/koala
 ln -s $PWD/koala.service $HOME/.config/systemd/user/
 systemctl --user daemon-reload
+systemctl --user systemctl enable koala.service
 systemctl --user systemctl start koala.service
 ```
 
-Execute the following command when adding, removing, or modifying streams:
+Restart the service when adding, removing, or modifying streams:
 
 ```
 systemctl --user systemctl restart koala.service
 ```
+
+## Testing
+
+A `tests` script is provided to test exceptions and terminations.
+
+To test main functionality, you may use VLC.
+
+Open VLC, navigate to `Media > Open Network Stream` and enter `udp://@:$PORT` replacing $PORT with which port your stream is pointing to.
+
+Show verbose terminal output with `./koala -v` or `./koala --verbose`.
 
 ## Useful links
 
