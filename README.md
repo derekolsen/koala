@@ -14,7 +14,7 @@ Requires the following packages:
 By default, Koala uses the command `chromium` to launch a browser in kiosk mode.
 If your system is using a Flatpak build of chromium or chromium is not in your
 $PATH, the `$chrome` environment variable must either be set to your chromium
-command or manually changed in line 8 of `koala`. 
+command or manually changed in line 6 of `koala`. 
 
 Examples:
 

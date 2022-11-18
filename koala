@@ -1,14 +1,12 @@
 #!/bin/bash
+set -e
 
 # Check for environment-informed chromium binary or otherwise set one
 # This can be modified for your use case
-
-set -e
-
 [ -z "$chrome" ] && chrome="chromium"
 
 streams=$PWD/streams
-stderr="/dev/null"
+errfile="/dev/null"
 destination_array=()
 oneshot=false
 
@@ -25,7 +23,7 @@ _end() {
 
 _exit() {
     # Kill all child processes on exit
-    jobs="$(jobs -p)"; [ -n "$jobs" ] && kill $jobs 2> $stderr
+    jobs="$(jobs -p)"; [ -n "$jobs" ] && kill $jobs 2> $errfile
     tset
 }
 
@@ -70,7 +68,7 @@ default_env
 # Get options
 while [[ "$1" =~ ^- && ! "$1" == "--" ]]; do case $1 in
   -v | --verbose )
-    stderr="/dev/stdout"
+    errfile="/dev/stdout"
     ;;
   -f | --file )
     shift; file=$1
@@ -158,7 +156,7 @@ create_stream() {
         --fullscreen \
         --window-position=0,0 \
         --window-size=${width},${height} \
-        ${url} 2> $stderr &
+        ${url} 2> $errfile &
 
     # Start ffmpeg
     ffmpeg \
@@ -171,7 +169,7 @@ create_stream() {
         -i :${Xdisplay} \
         -b:v ${bitrate}k \
         -f mpegts \
-        udp://${destination} 2> $stderr &
+        udp://${destination} 2> $errfile &
 
     # Console output
     if [[ -z "$1" ]]; then
@@ -187,8 +185,10 @@ if [[ -e "${file}" ]]; then
     newline_fix "$file"
     create_stream "$file"
 elif $oneshot; then
+    # Oneshot mode
     create_stream
 else
+    # Normal mode
     # Check if stream directory exists and is not empty
     [[ -d ${streams} ]] || _end 3
     [[ "$(ls ${streams})" ]] || _end 4
