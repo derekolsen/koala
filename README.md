@@ -9,7 +9,6 @@ Requires the following packages:
 - xvfb
 - chromium
 - ffmpeg
-- libxcb
 
 By default, Koala uses the command `chromium` to launch a browser in kiosk mode.
 If your system is using a Flatpak build of chromium or chromium is not in your
