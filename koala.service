@@ -3,6 +3,9 @@ Description=Koala
 After=network.target
 
 [Service]
+Type=simple
+User=koala
+Group=koala
 WorkingDirectory=/opt/koala
 ExecStart=/opt/koala/koala
 
