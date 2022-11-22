@@ -1,15 +1,16 @@
 #!/bin/bash
 
-# Install with `curl -fsSL $URL | sudo bash`
+# Install with `curl -fsSL $SCRIPT_URL | sudo bash`
+# Note: currently not working on Ubuntu due to snapd incompatibility
 
 REPO="https://github.com/robottalk/koala.git"
 INSTALL_DIR="/opt/koala"
 KOALA_USER="koala"
 
-# Exit if not root
 [ "$UID" != 0 ] && echo "This script must be run as root" && exit 1
 
-# Create system user
+apt-get install -y xvfb ffmpeg chromium-browser
+
 useradd -r $KOALA_USER
 
 git clone $REPO $INSTALL_DIR
