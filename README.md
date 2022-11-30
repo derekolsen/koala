@@ -78,6 +78,19 @@ Other available options are described in the usage table above.
 
 ## Systemd Installation
 
+### Script Install
+
+An installation script is provided for Debian only and creates a user named `koala`.
+Use this command to install:
+
+```
+curl -fsSL https://raw.githubusercontent.com/robottalk/koala/main/install.sh | sudo bash
+```
+
+### Manual Install
+
+Manually install the script to any user with these commands:
+
 ```
 cd koala
 ln -s $PWD /opt/koala
@@ -87,11 +100,18 @@ systemctl --user systemctl enable koala.service
 systemctl --user systemctl start koala.service
 ```
 
-Restart the service when adding, removing, or modifying streams:
+### Modifying Streams
+
+Restart the service while logged in as the Koala user when adding, removing, or modifying streams:
 
 ```
 systemctl --user systemctl restart koala.service
 ```
+
+### Notes about Systemd
+
+Koala is meant to run as an unprivileged user (this is mainly for chromium compatibility),
+and so the service unit is built as a user service.
 
 ## Testing
 
