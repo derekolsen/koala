@@ -133,7 +133,7 @@ EOF
 $koala | strip_color > /dev/null &
 sleep 3s
 kill $(jobs -p)
-sleep 3s
+sleep 6s
 set +e
 ps x | grep -v grep | grep Xvfb
 assert 1 $?
