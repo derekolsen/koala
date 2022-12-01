@@ -2,7 +2,7 @@
 
 # Install with `curl -fsSL $SCRIPT_URL | sudo bash`
 
-REPO="https://github.com/robottalk/koala.git"
+REPO="https://github.com/derekolsen/koala.git"
 INSTALL_DIR="/opt/koala"
 KOALA_USER="koala"
 
