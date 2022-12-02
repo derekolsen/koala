@@ -84,7 +84,7 @@ An installation script is provided for Debian only and creates a user named `koa
 Use this command to install:
 
 ```
-curl -fsSL https://raw.githubusercontent.com/robottalk/koala/main/install.sh | sudo bash
+curl -fsSL https://raw.githubusercontent.com/derekolsen/koala/main/install.sh | sudo bash
 ```
 
 ### Manual Install
